@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <section class="section" id="app">
+        <h2  class="title">Menu Selection for {{ menu.day }} is:</h2>
+        <hr>
+        <section class="form">
+            <div class="form-check" v-for="(dish, counter) in dishes">
+              <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+              <div class="card">
+                  <h5 class="card-header">
+                      {% verbatim %}
+                      Option {{ counter + 1 }}
+                      {% endverbatim %}
+                  </h5>
+                  <div class="card-body" v-for="(item, num) in dish.dishes">
+                    <h5 class="card-title">{% verbatim %}{{ item.name }}{% endverbatim %}</h5>
+                    <p v-if="item.description" class="card-text">{% verbatim %}{{ item.description }}{% endverbatim %}</p>
+                  </div>
+                  <div class="card-body">
+                    <label class="">
+                        {{ dish.name }}
+                    </label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                  </div>
+              </div>
+            </div>
+
+        </section>
+    </section>
+
+    {% if not read_only_mode %}
+    <div>
+        <form>
+        {% for dish in dishes %}
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="dish" value="{{ dish.id }}">
+          <label class="form-check-label">
+            {{ dish.name }}
+          </label>
+        </div>
+        {% endfor %}
+        <br>
+        <div class="mb-3">
+          <label for="exampleFormControlTextarea1" class="form-label">Comments</label>
+          <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+        </div>
+        <div class="col-auto">
+            <button type="button" id="sender" class="btn btn-primary mb-3 visually-hidden">Send</button>
+        </div>
+
+        </form>
+    </div>
+    {% else %}
+        {% if dish_select %}
+            <p>
+                Your selection was <span class="fs-4">"{{ dish_select.item.name }}"</span> with the comment: {{ dish_select.comments|default_if_none:"No comments" }}
+            </p>
+        {% else %}
+            <ul>
+                {% for dish in menu.menuitem_set.all %}
+                    <li>{{ dish.name }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+    {% endif %}
+{% endblock %}
+{% block modal %}
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToastSuccess" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              Your Lunch was added!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    </div>
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToastDanger" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              There is an error
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    </div>
+{% endblock modal %}
+{% block inline_javascript %}
+    <script>
+        const dishes = [
+            {% for dish in dishes %}
+                {
+                    id: "{{ dish.id }}",
+                    {% autoescape off %}
+                    dishes: JSON.parse('{{dish.get_json_as_str}}'),
+                    {% endautoescape %}
+                },
+            {% endfor %}
+        ]
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+    <script>
+      new Vue({
+          el: '#app',
+          data: {
+            dishes: dishes,
+            selectedMenu: false
+          }
+
+      })
+    </script>
+    {% if not read_only_mode %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const button = document.getElementById("sender")
+            const radios = document.querySelectorAll("input[name=dish]")
+            let dish_id = ""
+            radios.forEach(radio => {
+                radio.addEventListener("change", function() {
+                    dish_id = radio.value
+                    button.classList.remove("visually-hidden")
+                })
+            })
+            const toastLiveSuccess = document.getElementById('liveToastSuccess')
+            const toastLiveDanger = document.getElementById('liveToastDanger')
+            button.addEventListener('click', function() {
+                axios.post('/api/v1/menu_select/', {
+                    "menu": "{{ menu.id }}",
+                    "item": dish_id,
+                    "user": "{{ user.id }}",
+                    "comment": document.querySelector("textarea").value
+                }, {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(function (response) {
+                    if(response.status === 201) {
+                        const toast = new bootstrap.Toast(toastLiveSuccess)
+                        toast.show()
+                        setTimeout(function() {
+                            location.reload()
+                        }, 2000)
+                    }else{
+                        const toast = new bootstrap.Toast(toastLiveDanger)
+                        toast.show()
+                    }
+
+                }).catch(function (error) {
+                    console.log(error)
+                    const toast = new bootstrap.Toast(toastLiveDanger)
+                    toast.show()
+                })
+            })
+        })
+    </script>
+    {% endif %}
+{% endblock inline_javascript %}

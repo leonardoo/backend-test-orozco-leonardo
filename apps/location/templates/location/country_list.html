@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url "location:country_create" %}" class="btn btn-primary">Create Office</a>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-borderless">
+            <thead>
+                <tr>
+                    <th>Office</th>
+                    <th>Timezone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        {% for office in object_list %}
+            <tbody>
+                <tr>
+                    <td>{{ office.name }}</td>
+                    <td>{{ office.tz }}</td>
+                    <td>
+                        <a href="{% url "location:country_edit" pk=office.pk %}" class="link-primary">Edit Office</a>
+                    </td>
+                </tr>
+            </tbody>
+        {% endfor %}
+        </table>
+    </div>
+{% endblock %}

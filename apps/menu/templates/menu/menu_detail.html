@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <section class="section" id="app">
+        <h2  class="title">Menu Selection for {{ menu.day }} is:</h2>
+        <hr>
+        <section class="form">
+            <div class="form-check" v-for="(dish, counter) in dishes">
+              <input v-if="!readOnly" class="form-check-input" @click="selectOption(dish.id, counter)" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+              <div class="card">
+                  <h5 class="card-header">
+                      {% verbatim %}
+                      Option {{ counter + 1 }}
+                      {% endverbatim %}
+                  </h5>
+                  <div class="row">
+                    <div v-for="(item, num) in dish.dishes" class="col">
+                        <div class="card-body">
+                        <h5 class="card-title">{% verbatim %}{{ item.name }}{% endverbatim %}</h5>
+                        <p v-if="item.description" class="card-text">{% verbatim %}{{ item.description }}{% endverbatim %}</p>
+                        </div>
+                        <div class="card-body" v-if="dishSelected === dish.id">
+                            <label class="">Comments</label>
+                            <textarea v-if="!readOnly" v-model.lazy="comments[num]" class="form-control" id="exampleFormControlTextarea1" rows="2"></textarea>
+                            <p v-else>
+                                {% verbatim %}{{ comments[num] }}{% endverbatim %}
+                            </p>
+                        </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <button v-if="selectedOption && !readOnly" @click="sendRequest">Send Request</button>
+        </section>
+    </section>
+{% endblock %}
+{% block modal %}
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToastSuccess" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              Your Lunch was added!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    </div>
+    <div class="toast-container position-absolute top-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToastDanger" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              There is an error
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+    </div>
+{% endblock modal %}
+{% block inline_javascript %}
+    <script>
+        const dishes = [
+            {% for dish in dishes %}
+                {
+                    id: "{{ dish.id }}",
+                    {% autoescape off %}
+                    dishes: JSON.parse('{{dish.get_json_as_str}}'),
+                    {% endautoescape %}
+                },
+            {% endfor %}
+        ]
+        let dishSelected = ""
+        let comments = []
+        {% if dish_select %}
+           dishSelected = "{{ dish_select.item_id }}"
+           {% autoescape off %}
+           comments = JSON.parse('{{dish_select.get_json_as_str}}')
+           {% endautoescape %}
+        {% endif %}
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+    <script>
+      new Vue({
+          el: '#app',
+          data: {
+            dishes: dishes,
+            selectedOption: false,
+            dishSelected: dishSelected || "",
+            comments: comments || [],
+            readOnly: {% if read_only_mode %}true{% else %}false{% endif %}
+          },
+          methods : {
+              selectOption(id, counter) {
+                  this.dishSelected = id
+                  let comments = []
+                  dishes[counter].dishes.forEach((item)=>{
+                      comments.push("")
+                  })
+                  this.comments = comments
+                  this.selectedMenu = true
+              },
+              sendRequest(){
+                  {% if not read_only_mode %}
+                  axios.post('/api/v1/menu_select/', {
+                    "menu": "{{ menu.id }}",
+                    "item": this.dishSelected,
+                    "user": "{{ user.id }}",
+                    "comment": this.comments
+                }, {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(function (response) {
+                    if(response.status === 201) {
+                        const toastLiveSuccess = document.getElementById('liveToastSuccess')
+                        const toast = new bootstrap.Toast(toastLiveSuccess)
+                        toast.show()
+                        setTimeout(function() {
+                            location.reload()
+                        }, 2000)
+                    }else{
+                        const toastLiveDanger = document.getElementById('liveToastDanger')
+                        const toast = new bootstrap.Toast(toastLiveDanger)
+                        toast.show()
+                    }
+
+                }).catch(function (error) {
+                    console.error(error)
+                    const toastLiveDanger = document.getElementById('liveToastDanger')
+                    const toast = new bootstrap.Toast(toastLiveDanger)
+                    toast.show()
+                })
+                {% endif %}
+              }
+
+          }
+      })
+    </script>
+{% endblock inline_javascript %}

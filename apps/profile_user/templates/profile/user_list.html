@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url "profile:user_create" %}" class="btn btn-primary">Create User</a>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-borderless">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Slack User</th>
+                    <th>Country</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+        {% for user in object_list %}
+            <tbody>
+                <tr>
+                    <td>{{ user.username }}</td>
+                    {% if user.profile %}
+                        <td>{{ user.profile.slack_user }}</td>
+                        <td>{{ user.profile.location|default_if_none:"" }}</td>
+                    {% else %}
+                        <td></td>
+                        <td></td>
+                    {% endif %}
+                    <td>
+                        <a href="{% url "profile:user_profile_edit" pk=user.pk %}" class="link-primary">Edit Profile</a>
+                    </td>
+                </tr>
+            </tbody>
+        {% endfor %}
+        </table>
+    </div>
+{% endblock content %}
