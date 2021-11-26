@@ -5,7 +5,9 @@ from apps.menu.models import MenuItem
 
 
 @pytest.mark.django_db
-def test_serializer_menu_select_valid(create_menu, create_user, create_location, set_date_lunch):
+def test_serializer_menu_select_valid(
+    create_menu, create_user, create_location, set_date_lunch
+):
     menu = create_menu()
     user = create_user()
     set_date_lunch()
@@ -13,7 +15,7 @@ def test_serializer_menu_select_valid(create_menu, create_user, create_location,
         "menu": menu.id,
         "user": user.id,
         "item": MenuItem.objects.first().id,
-        "comments": ["test"]
+        "comments": ["test"],
     }
     location = create_location[1]
     serializer = MenuSelectByUserSerializer(data=data)
@@ -23,7 +25,9 @@ def test_serializer_menu_select_valid(create_menu, create_user, create_location,
 
 
 @pytest.mark.django_db
-def test_serializer_menu_select_invalid(create_menu, create_user, create_location, set_date_lunch):
+def test_serializer_menu_select_invalid(
+    create_menu, create_user, create_location, set_date_lunch
+):
     menu = create_menu()
     user = create_user()
     set_date_lunch(hour=23)
@@ -31,7 +35,7 @@ def test_serializer_menu_select_invalid(create_menu, create_user, create_locatio
         "menu": menu.id,
         "user": user.id,
         "item": MenuItem.objects.first().id,
-        "comments": ["test"]
+        "comments": ["test"],
     }
     location = create_location[1]
     serializer = MenuSelectByUserSerializer(data=data)

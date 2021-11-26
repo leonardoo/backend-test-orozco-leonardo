@@ -21,8 +21,8 @@ def clean_cache():
 def create_location():
     yield Country.objects.bulk_create(
         [
-            Country(name="Colombia", tz="America/Bogota"),
-            Country(name="Chile", tz="America/Santiago"),
+            Country(name="Colombia", tz="America/Bogota", slack_channel_id="channel_1"),
+            Country(name="Chile", tz="America/Santiago", slack_channel_id="channel_2"),
         ]
     )
 

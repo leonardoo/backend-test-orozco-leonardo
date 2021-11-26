@@ -20,7 +20,7 @@ class CountryUpdateView(StaffOnlyMixin, UpdateView):
     template_name = "base_form.html"
 
 
-class CountryDeleteView(StaffOnlyMixin,DeleteView):
+class CountryDeleteView(StaffOnlyMixin, DeleteView):
     model = Country
     success_url = reverse_lazy("location:country_list")
 

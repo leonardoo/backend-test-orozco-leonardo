@@ -42,8 +42,7 @@ def test_create_menu_by_api_items_empty(client, create_user):
     data = {
         "day": datetime.date.today().isoformat(),
         "status": MenuStatus.ACTIVE,
-        "items": [
-        ],
+        "items": [],
     }
     response = client.post(
         "/api/v1/menu/", data=json.dumps(data), content_type="application/json"

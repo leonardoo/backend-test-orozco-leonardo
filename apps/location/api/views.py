@@ -1,7 +1,7 @@
-from rest_framework import viewsets, permissions
+from rest_framework import permissions, viewsets
 
-from .serializers import CountrySerializer
 from ..models import Country
+from .serializers import CountrySerializer
 
 
 class CountryViewSet(viewsets.ReadOnlyModelViewSet):

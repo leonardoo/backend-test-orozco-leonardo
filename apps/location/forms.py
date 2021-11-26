@@ -6,4 +6,4 @@ from apps.location.models import Country
 class CountryForm(forms.ModelForm):
     class Meta:
         model = Country
-        fields = ["name", "tz"]
+        fields = ["name", "tz", "slack_channel_id"]

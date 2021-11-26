@@ -8,10 +8,10 @@ from apps.profile_user.models import Profile
 def test_create_profile_for_user(create_user, create_location):
     user = create_user(create_profile=False)
 
-    form = UserProfileForm(data={
-        'location': create_location[0].id,
-        "slack_user": ""
-    }, instance=Profile(user=user))
+    form = UserProfileForm(
+        data={"location": create_location[0].id, "slack_user": ""},
+        instance=Profile(user=user),
+    )
 
     assert form.is_valid()
     form.save()
@@ -25,15 +25,12 @@ def test_create_profile_for_user(create_user, create_location):
 def test_allow_create_profile_for_user_without_location(create_user, create_location):
     user = create_user(create_profile=False)
 
-    form = UserProfileForm(data={
-        'location': "",
-        "slack_user": ""
-    }, instance=Profile(user=user))
+    form = UserProfileForm(
+        data={"location": "", "slack_user": ""}, instance=Profile(user=user)
+    )
 
     assert form.is_valid()
     form.save()
     assert Profile.objects.count() == 1
     profile = Profile.objects.first()
     assert profile.user == user
-
-

@@ -41,9 +41,7 @@ def test_menu_detail_view_for_send_lunch(
 
 
 @pytest.mark.django_db
-def test_menu_create_view(
-    client, create_menu, create_user, set_date_lunch
-):
+def test_menu_create_view(client, create_menu, create_user, set_date_lunch):
     set_date_lunch()
     user = create_user(create_profile=True)
     url = reverse("menu:menu_create")
@@ -53,15 +51,20 @@ def test_menu_create_view(
 
 
 @pytest.mark.django_db
-def test_menu_create_view(
-    client, create_menu, create_user, set_date_lunch
-):
+def test_menu_create_view_staff(client, create_menu, create_user, set_date_lunch):
     set_date_lunch()
-    user = create_user(create_profile=True)
+    user = create_user(is_staff=True)
     url = reverse("menu:menu_create")
     client.force_login(user)
     response = client.get(url)
-    assert response.status_code == 403
+    assert response.status_code == 200
 
 
-
+@pytest.mark.django_db
+def test_menu_edit_view_staff(client, create_menu, create_user, set_date_lunch):
+    set_date_lunch()
+    user = create_user(is_staff=True)
+    url = reverse("menu:menu_update", kwargs={"pk": create_menu().pk})
+    client.force_login(user)
+    response = client.get(url)
+    assert response.status_code == 200

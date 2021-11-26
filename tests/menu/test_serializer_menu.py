@@ -8,18 +8,17 @@ from apps.menu.models import Menu, MenuItem
 def test_serializer_menu_with_items(create_location):
     data = {
         "day": "2021-11-23",
-        'name': 'Test menu',
+        "name": "Test menu",
         "location": create_location[1].id,
-        'items': [
+        "items": [
             {
                 "dishes": [
                     {
-                        'name': 'Test item',
+                        "name": "Test item",
                     }
                 ]
             }
-
-        ]
+        ],
     }
     serializer = MenuSerializer(data=data)
     is_valid = serializer.is_valid()
@@ -30,9 +29,9 @@ def test_serializer_menu_with_items(create_location):
 def test_serializer_menu_with_items_empty(create_location):
     data = {
         "day": "2021-11-23",
-        'name': 'Test menu',
+        "name": "Test menu",
         "location": create_location[1].id,
-        'items': []
+        "items": [],
     }
     serializer = MenuSerializer(data=data)
     is_valid = serializer.is_valid()
@@ -43,21 +42,20 @@ def test_serializer_menu_with_items_empty(create_location):
 def test_serializer_menu_with_items_dishes_empty(create_location):
     data = {
         "day": "2021-11-23",
-        'name': 'Test menu',
+        "name": "Test menu",
         "location": create_location[1].id,
-        'items': [
+        "items": [
             {
                 "dishes": [
                     {
-                        'name': 'Test item',
+                        "name": "Test item",
                     },
                     {
-                        'name': '',
-                    }
+                        "name": "",
+                    },
                 ]
             }
-
-        ]
+        ],
     }
     serializer = MenuSerializer(data=data)
     is_valid = serializer.is_valid()
@@ -68,25 +66,24 @@ def test_serializer_menu_with_items_dishes_empty(create_location):
 def test_serializer_menu_perform_create(create_location):
     data = {
         "day": "2021-11-23",
-        'name': 'Test menu',
+        "name": "Test menu",
         "location": create_location[1].id,
-        'items': [
+        "items": [
             {
                 "dishes": [
                     {
-                        'name': 'Test item',
+                        "name": "Test item",
                     },
                     {
-                        'name': 'Item 2',
-                    }
+                        "name": "Item 2",
+                    },
                 ]
             }
-
-        ]
+        ],
     }
     serializer = MenuSerializer(data=data)
     serializer.is_valid(raise_exception=True)
     serializer.save()
-    assert serializer.data['id'] is not None
+    assert serializer.data["id"] is not None
     assert Menu.objects.count() == 1
     assert MenuItem.objects.count() == 1
