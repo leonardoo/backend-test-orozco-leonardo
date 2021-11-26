@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 from .envtools import getenv
 
 # import sentry_sdk
@@ -54,7 +56,8 @@ INSTALLED_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
-    'widget_tweaks',
+    "widget_tweaks",
+    "django_filters",
     # apps
     "backend_test.utils",
     "apps.location",
@@ -258,3 +261,22 @@ AUTHENTICATION_BACKENDS = [
 ]
 LOGIN_REDIRECT_URL = "profile:home"
 LOGIN_URL = "account_login"
+
+
+SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
+SLACK_TOKEN = os.getenv("SLACK_TOKEN", "")
+SLACK_SEND_MENU_HOUR = int(os.getenv("SLACK_SEND_MENU_HOUR", "11"))
+
+# Celery
+
+CELERY_BROKER_URL = f'redis://{getenv("REDIS_CACHE_HOSTNAME", default="redis")}:6379/1'
+CELERY_RESULT_BACKEND = (
+    f'redis://{getenv("REDIS_CACHE_HOSTNAME", default="redis")}:6379/1'
+)
+
+CELERY_BEAT_SCHEDULE = {
+    "get_menu_task": {
+        "task": "apps.menu.tasks.select_menu_to_send_auto",
+        "schedule": crontab(minute="*/1"),
+    },
+}

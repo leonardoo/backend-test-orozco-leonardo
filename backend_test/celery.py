@@ -67,4 +67,5 @@ settings = CelerySettings()
 
 app = Celery("backend_test")
 app.config_from_object(settings)
+app.config_from_object("django.conf:settings", namespace="CELERY")
 app.autodiscover_tasks()

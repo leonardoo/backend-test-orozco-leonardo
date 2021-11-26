@@ -13,17 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import TemplateView
 
 from .utils.healthz import healthz
 
 api_urls = [
-    path("v1/", include([
-        path("", include("apps.menu.api.urls"), name="menu"),
-        path("", include("apps.location.api.urls"), name="location")
-    ]))
+    path(
+        "v1/",
+        include(
+            [
+                path("", include("apps.menu.api.urls"), name="menu"),
+                path("", include("apps.location.api.urls"), name="location"),
+            ]
+        ),
+    )
 ]
 
 
@@ -39,5 +43,4 @@ urlpatterns = [
     # Django Admin, use {% raw %}{% url 'admin:index' %}{% endraw %}
     # User management
     path("accounts/", include("allauth.urls")),
-    path('admin/', admin.site.urls),
 ]
