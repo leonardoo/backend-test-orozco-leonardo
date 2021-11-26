@@ -67,3 +67,6 @@ django-filter==21.1
 
 #slack
 slackclient==2.9.3
+
+#docs
+drf-yasg==1.20.0

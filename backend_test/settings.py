@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "widget_tweaks",
     "django_filters",
+    "drf_yasg",
     # apps
     "backend_test.utils",
     "apps.location",
