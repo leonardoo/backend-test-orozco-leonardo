@@ -1,9 +1,9 @@
-from .models import Profile
 from django import forms
+
+from .models import Profile
 
 
 class UserProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['location', 'slack_user']
-
+        fields = ["location", "slack_user"]

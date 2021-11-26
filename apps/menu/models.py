@@ -1,12 +1,11 @@
 import json
 import uuid
-from datetime import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 
-# Create your models here.
 from apps.menu.constants import MenuStatus
 
 
@@ -16,20 +15,19 @@ class Menu(models.Model):
     status = models.CharField(
         choices=MenuStatus.choices, max_length=20, default=MenuStatus.ACTIVE
     )
-    location = models.ForeignKey(
-        "location.Country", on_delete=models.CASCADE
-    )
+    location = models.ForeignKey("location.Country", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        "auth.User", on_delete=models.CASCADE, null=True
-    )
+    created_by = models.ForeignKey("auth.User", on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{_('Menu for')} {self.day.isoformat()}"
 
     class Meta:
         unique_together = ("day", "location")
+
+    def get_absolute_url(self):
+        return reverse_lazy("menu:menu_detail", kwargs={"pk": self.pk})
 
 
 class MenuItem(models.Model):
