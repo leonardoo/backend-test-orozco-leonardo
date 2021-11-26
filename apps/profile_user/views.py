@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 
 from apps.base.mixins import StaffOnlyMixin
@@ -21,11 +21,6 @@ class UserListView(StaffOnlyMixin, ListView):
     queryset = User.objects.prefetch_related("profile", "profile__location").all()
     template_name = "profile/user_list.html"
 
-    def get_context_data(self):
-        context = super().get_context_data()
-        print(context)
-        return context
-
 
 @login_required
 def user_create_view(request):
@@ -39,9 +34,16 @@ def user_create_view(request):
         profile = form_profile.save(commit=False)
         profile.user = user
         profile.save()
-        messages.add_message(request, messages.INFO, f'User {user.username} was successfully created')
+        messages.add_message(
+            request, messages.INFO, f"User {user.username} was successfully created"
+        )
         status = 201
-    return render(request, "profile/user_form.html", {"forms": [form_user, form_profile]}, status=status)
+    return render(
+        request,
+        "profile/user_form.html",
+        {"forms": [form_user, form_profile]},
+        status=status,
+    )
 
 
 @login_required
@@ -53,5 +55,9 @@ def user_edit_profile_view(request, pk):
     form_profile = UserProfileForm(request.POST, prefix="profile", instance=profile)
     if form_profile.is_valid():
         form_profile.save()
-        messages.add_message(request, messages.INFO, f'User {user.username} was successfully updated profile')
+        messages.add_message(
+            request,
+            messages.INFO,
+            f"User {user.username} was successfully updated profile",
+        )
     return render(request, "profile/user_form.html", {"forms": [form_profile]})
