@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <section class="section" id="app">
+        <h2  class="title">Menu Selection for {{ menu.day }} is:</h2>
+        <hr>
+        <section id="app">
+            <div class="row" v-for="(dish, counter) in dishes">
+                {% verbatim %}
+                    <h3>User Select Option {{ counter + 1 }}</h3>
+                {% endverbatim %}
+                <table>
+                    <tr>
+                        <th>User</th>
+                        <th v-for="item in dish.dishes">
+                            {% verbatim %}
+                            {{ item.name }}
+                            {% endverbatim %}
+                        </th>
+                    </tr>
+                    <tr v-for="user_select in selections[dish.id]">
+                        {% verbatim %}
+                        <td>{{ user_select.user.username }}</td>
+                        <td v-if="!user_select.comments" colspan="{{ dish.dishes.length }}">
+                            No Comments
+                        </td>
+                        <td v-else v-for="comment = user_select.comments">
+                            {{ comment }}
+                        </td>
+                        {% endverbatim %}
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <hr>
+            </div>
+
+        </section>
+    </section>
+{% endblock %}
+{% block inline_javascript %}
+    <script>
+        const menu_id = "{{ menu.id }}"
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script>
+      new Vue({
+          el: '#app',
+          data: {
+            dishes: [],
+            selections: {}
+          },
+          methods : {
+              setData(dishes, selections){
+                  this.dishes = dishes
+                  this.selections = _.groupBy(selections, 'item')
+              }
+          },
+          mounted () {
+            axios.all([
+                axios.get('/api/v1/menu_item/?menu='+menu_id),
+                axios.get('/api/v1/menu_select/?menu='+menu_id)
+            ]).then(axios.spread((...responses) => {
+                this.setData(responses[0].data, responses[1].data)
+            })).catch(errors => {
+                console.error(errors)
+            })
+          }
+      })
+    </script>
+{% endblock inline_javascript %}

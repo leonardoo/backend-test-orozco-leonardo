@@ -7,13 +7,13 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('menu', '0001_initial'),
+        ("menu", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='menuselectbyuser',
-            name='comments',
+            model_name="menuselectbyuser",
+            name="comments",
             field=django.contrib.postgres.fields.jsonb.JSONField(null=True),
         ),
     ]

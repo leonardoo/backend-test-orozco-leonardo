@@ -5,7 +5,7 @@
     <div class="columns" id="app">
     <div class="column is-two-thirds">
       <section class="section">
-        <h1 class="title">Create Menu</h1>
+        <h1 class="title">Edit Menu</h1>
         <hr>
 
         <!-- form starts here -->
@@ -21,7 +21,7 @@
                 </div>
             </div>
             <div class="mb-3">
-                <label class="col-sm-2 col-form-label">Location</label>
+                <label class="col-sm-2 col-form-label">Day</label>
                 <div class="col-sm-10">
                     <select class="form-control" v-model="form.location">
                     <option disabled value="">Nothing selected</option>
@@ -34,7 +34,7 @@
                 </div>
             </div>
             <button @click="addDish" class="bg-primary">Add new Option</button>
-            <div class="card" v-for="(dish, counter) in form.items"  v-bind:key="counter">
+            <div class="card"  v-for="(dish, counter) in form.items" v-bind:key="counter">
               <div class="card-header">
                 <ul class="nav nav-pills card-header-pills">
                   <li class="nav-item">
@@ -46,8 +46,10 @@
                 </ul>
               </div>
               <div class="card-body">
-                <h5 class="card-title">Option {% verbatim %}{{ counter + 1 }}{% endverbatim %}</h5>
-                <div class="row" v-for="(item, item_num) in dish.dishes"  v-bind:key="item_num">
+                <h5 class="card-title">
+                    Option {% verbatim %}{{ counter + 1 }} <span v-if="dish.action === 'delete'">to {{ dish.action }}</span>{% endverbatim %}
+                </h5>
+                <div class="row" v-for="(item, item_num) in dish.dishes" v-bind:key="item_num">
                     <div class="col">
                         <label for="duration">Dish:</label>
                         <input type="text" v-model.lazy="item.name" required>
@@ -98,14 +100,17 @@
 {% block inline_javascript %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.min.js"></script>
     <script>
+        const menu_id = '{{ menu_id|default_if_none:'' }}'
+    </script>
+    <script>
       new Vue({
           el: '#app',
           data: {
             form : {
+              id: menu_id,
               day: '{{ day }}',
               location: '',
               items: [
-
               ],
             },
             options: {
@@ -119,26 +124,32 @@
                   dishes: [
                       {
                           name:'',
-                          description: ''
+                          description: '',
                       }
-                  ]
+                  ],
+                  action: "add"
               })
             },
             addItem(counter){
                 this.form.items[counter].dishes.push({
                     name: '',
-                    description: ''
+                    description: '',
                 })
             },
             deleteDish(counter){
-              this.form.items.splice(counter,1);
+                const item = this.form.items[counter]
+                if(!item.hasOwnProperty("id")){
+                    this.form.items.splice(counter, 1)
+                }else{
+                    item.action = 'delete'
+                }
             },
             deleteItem(counter, num){
                 this.form.items[counter].dishes.splice(num,1);
             },
             sendRequest(){
-                axios.post(
-                    "/api/v1/menu/",
+                axios.put(
+                    "/api/v1/menu/" + menu_id + "/",
                     this.form, {
                     withCredentials: true,
                     headers: {
@@ -146,7 +157,7 @@
                         'X-CSRFToken': '{{ csrf_token }}'
                     }
                 }).then(response=>{
-                    window.location = '/menu/';
+                    location.reload()
                 }).catch(error=>{
                     const toastLiveDanger = document.getElementById('liveToastDanger')
                     const error_span = document.getElementById('error_toast')
@@ -155,11 +166,37 @@
                     console.log(error);
                 })
             },
+            setData(menu, items){
+                this.form.id = menu.id
+                this.form.day = menu.day
+                this.form.location = menu.location
+                this.form.items = items
+            }
           },
           mounted () {
             axios
               .get('/api/v1/country/')
               .then(response => (this.options.countries = response.data))
+            if(this.form.id){
+                axios.all([
+                    axios.get('/api/v1/menu/'+this.form.id+'/'),
+                    axios.get('/api/v1/menu_item/?menu='+this.form.id)
+                ]).then(axios.spread((...responses) => {
+                    const data = responses[1].data.map((item)=>{
+                        const dishes = item.dishes.map((dish)=>{
+                            return {
+                                name: dish.name,
+                                description: dish.description,
+                                action: ''
+                            }
+                        })
+                        return {...item, dishes}
+                    })
+                    this.setData(responses[0].data, data)
+                })).catch(errors => {
+                  console.error(errors)
+                })
+            }
           }
       })
     </script>

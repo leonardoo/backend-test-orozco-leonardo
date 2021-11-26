@@ -22,7 +22,10 @@
                 <td>{{ menu.location }}</td>
                 <td>
                     <a href="{% url 'menu:menu_detail' menu.id %}" class="link-primary">View</a>
-                    <a href="{% url 'menu:menu_detail' menu.id %}" class="link-primary">View Selection</a>
+                    {% if request.user.is_staff %}
+                    <a href="{% url 'menu:menu_select_detail' menu.id %}" class="link-primary">View User Selection</a>
+                    <a href="{% url 'menu:menu_update' menu.id %}" class="link-primary">Edit</a>
+                    {% endif %}
                 </td>
             </tr>
         </tbody>

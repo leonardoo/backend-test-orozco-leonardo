@@ -1,12 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import PermissionDenied
-from django.urls import reverse_lazy
-from django.views.generic import DetailView, ListView, UpdateView, TemplateView
+from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView, ListView, TemplateView
 
 from apps.base.mixins import StaffOnlyMixin
 from apps.menu.business import can_user_select_lunch, get_current_datetime_to_tz
-from apps.menu.forms import MenuForm
-from apps.menu.models import Menu, MenuSelectByUser, MenuItem
+from apps.menu.models import Menu, MenuItem, MenuSelectByUser
 
 
 class MenuCreateView(StaffOnlyMixin, TemplateView):
@@ -14,8 +12,6 @@ class MenuCreateView(StaffOnlyMixin, TemplateView):
     template_name = "menu/menu_create.html"
 
     def get_context_data(self, **kwargs):
-        if not self.request.user.is_staff:
-            raise PermissionDenied()
         context = super().get_context_data(**kwargs)
         timezone_data = self.request.user_timezone_data
         context["day"] = get_current_datetime_to_tz(timezone_data).date().isoformat()
@@ -27,10 +23,15 @@ class MenuListView(ListView, LoginRequiredMixin):
     context_object_name = "menus"
 
 
-class MenuUpdateView(UpdateView):
-    model = Menu
-    form_class = MenuForm
-    success_url = reverse_lazy("menu:menu_list")
+class MenuUpdateView(MenuCreateView):
+    template_name = "menu/menu_edit.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["menu"] = get_object_or_404(Menu, pk=self.kwargs["pk"])
+        context["menu_id"] = self.kwargs["pk"]
+        context["day"] = context["menu"].day.isoformat()
+        return context
 
 
 class MenuDetailView(DetailView):
@@ -61,9 +62,16 @@ class MenuDetailView(DetailView):
 class MenuDetailSelectedView(StaffOnlyMixin, DetailView):
     model = Menu
     context_object_name = "menu"
+    template_name = "menu/menu_detail_user_selection.html"
     queryset = Menu.objects.select_related("location")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["dishes"] = MenuItem.objects.filter(menu=self.object)
+        selected = {}
+        for select in MenuSelectByUser.objects.filter(menu=self.object):
+            if select.item_id not in selected:
+                selected[select.item_id] = []
+            selected[select.item_id].append(select)
+        context["selected"] = selected
         return context
