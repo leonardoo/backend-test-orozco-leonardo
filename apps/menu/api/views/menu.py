@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
+from django_filters import rest_framework as filters
+
 from apps.menu.api.serializers.menu import MenuItemSerializer, MenuSerializer
 from apps.menu.models import Menu, MenuItem
 
@@ -29,3 +31,5 @@ class MenuItemViewSet(viewsets.ModelViewSet):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_fields = ("menu",)

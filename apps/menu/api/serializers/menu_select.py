@@ -1,7 +1,14 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from apps.menu.business import can_user_select_lunch
 from apps.menu.models import MenuSelectByUser
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("username",)
 
 
 class MenuSelectByUserSerializer(serializers.ModelSerializer):
@@ -26,3 +33,19 @@ class MenuSelectByUserSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError("You can't select lunch")
         return data
+
+
+class MenuSelectByUserReadSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer()
+
+    class Meta:
+        model = MenuSelectByUser
+        fields = (
+            "id",
+            "menu",
+            "user",
+            "created_at",
+            "item",
+            "comments",
+        )
