@@ -48,6 +48,15 @@ class MenuSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        """
+        Validate the data and check the item information so, the user cannot add or edit items for other menus
+        Args:
+            data: dictionary of data to be validated
+
+        Returns:
+            dict with validated data
+        """
+        super().validate(data)
         if self.instance and self.instance.pk:
             items = data.get("items")
             err = {"items": []}
@@ -64,6 +73,13 @@ class MenuSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        """
+        Create the menu and add the items to it
+        Args:
+            validated_data: dictionary of data to create menu and items
+        Returns:
+            Menu object
+        """
         items = validated_data.pop("items")
         menu = super().create(validated_data)
         for item in items:
@@ -71,6 +87,14 @@ class MenuSerializer(serializers.ModelSerializer):
         return menu
 
     def update(self, instance, validated_data):
+        """
+        Update the menu and using action include in the item will add or remove the items from the menu send in the instance
+        Args:
+            instance: menu object
+            validated_data: dictionary of data to be updated from the menu and the items
+        Returns:
+            Menu object
+        """
         items = validated_data.pop("items")
         menu = super().update(instance, validated_data)
         for item in items:

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     # apps
     "backend_test.utils",
+    "apps.base",
     "apps.location",
     "apps.menu",
     "apps.profile_user",
@@ -266,7 +267,8 @@ LOGIN_URL = "account_login"
 
 SITE_URL = os.getenv("SITE_URL", "http://localhost:8000")
 SLACK_TOKEN = os.getenv("SLACK_TOKEN", "")
-SLACK_SEND_MENU_HOUR = int(os.getenv("SLACK_SEND_MENU_HOUR", "11"))
+SLACK_SEND_MENU_HOUR = int(os.getenv("SLACK_SEND_MENU_HOUR", "10"))
+SLACK_BLOCK_MENU_HOUR = int(os.getenv("SLACK_BLOCK_MENU_HOUR", "11"))
 
 # Celery
 
@@ -278,6 +280,6 @@ CELERY_RESULT_BACKEND = (
 CELERY_BEAT_SCHEDULE = {
     "get_menu_task": {
         "task": "apps.menu.tasks.select_menu_to_send_auto",
-        "schedule": crontab(minute="*/1"),
+        "schedule": crontab(minute="*/30"),
     },
 }

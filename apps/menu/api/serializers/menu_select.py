@@ -24,6 +24,14 @@ class MenuSelectByUserSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
+        """
+        Check if the user can select a item for lunch, this will validate that first the user had not selected any element for the day
+        then will validate than can select the item using the user timezone configuration
+        Args:
+            data: validated data
+        Returns:
+            validated data
+        """
         data = super().validate(data)
         select = MenuSelectByUser.objects.filter(user=data["user"], menu=data["menu"])
         if select.exists():

@@ -7,15 +7,17 @@ from pytz import timezone
 
 
 def get_current_datetime_to_tz(timezone_data):
+    """Return the datetime for the send timezone"""
     return datetime.now(tz=timezone(timezone_data["timezone"]))
 
 
 def can_user_select_lunch(timezone_data, menu):
+    """Check if with a timezone info and the menu a user can select a dish"""
     date_until_lunch = datetime(
         year=menu.day.year,
         month=menu.day.month,
         day=menu.day.day,
-        hour=settings.SLACK_SEND_MENU_HOUR,
+        hour=settings.SLACK_BLOCK_MENU_HOUR,
         minute=0,
         second=0,
         microsecond=0,

@@ -1,5 +1,14 @@
 ## cornershop-backend-test
 
+
+### Documentations
+
+- [How to run the app](./HOWTO.md)
+- [Database Docs](./docs/database.md)
+- [Architecture](./docs/architecture.md)
+- the api docs its in a swagger when you run the app will be in app_url/api//api/swagger/
+
+
 ### Running the development environment
 
 * `make up`

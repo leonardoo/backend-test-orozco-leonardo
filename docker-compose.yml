@@ -16,6 +16,10 @@ services:
       - PYTHONDONTWRITEBYTECODE=1
       # forwarded from the host if they exist
       - UPDATE_PYTHON_REQUIREMENTS_ON_CONTAINERSTART
+      - SLACK_SEND_MENU_HOUR=10
+      - SLACK_BLOCK_MENU_HOUR=11
+      - SLACK_TOKEN=token_here
+      - SITE_URL=http://localhost:8000
     volumes:
       - .:/opt/cornershop/backend-test
     ports:

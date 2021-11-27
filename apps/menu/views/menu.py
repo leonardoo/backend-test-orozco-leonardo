@@ -40,6 +40,14 @@ class MenuDetailView(DetailView):
     queryset = Menu.objects.select_related("location")
 
     def get_context_data(self, **kwargs):
+        """
+        Check if the user can select lunch for the day, or  will be only to see it,
+        also add the selected dish in the context that the user select for the menu from the day
+        Args:
+            **kwargs:
+        Returns:
+            context: with the readonly flag and the
+        """
         context = super().get_context_data(**kwargs)
         read_only_mode = True
         context["dish_select"] = None
@@ -64,14 +72,3 @@ class MenuDetailSelectedView(StaffOnlyMixin, DetailView):
     context_object_name = "menu"
     template_name = "menu/menu_detail_user_selection.html"
     queryset = Menu.objects.select_related("location")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["dishes"] = MenuItem.objects.filter(menu=self.object)
-        selected = {}
-        for select in MenuSelectByUser.objects.filter(menu=self.object):
-            if select.item_id not in selected:
-                selected[select.item_id] = []
-            selected[select.item_id].append(select)
-        context["selected"] = selected
-        return context

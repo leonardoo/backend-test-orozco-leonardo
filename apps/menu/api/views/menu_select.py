@@ -14,7 +14,7 @@ from apps.menu.models import MenuSelectByUser
 
 class IsAdminUser(BasePermission):
     """
-    The request is authenticated as a user, or is a read-only request.
+    The request is authenticated as a user and is staff.
     """
 
     def has_permission(self, request, view):
@@ -24,6 +24,10 @@ class IsAdminUser(BasePermission):
 
 
 class AllowUserToCreate(permissions.IsAuthenticated):
+    """
+    The request is authenticated as a user and its post request.
+    """
+
     def has_permission(self, request, view):
         return bool(super().has_permission(request, view) and request.method == "POST")
 
@@ -41,11 +45,20 @@ class MenuSelectCreateViewSet(
     filterset_fields = ("menu",)
 
     def get_serializer_class(self):
+        """
+        Check if the method is a Get and will return the serializer for read information else will return a serializer for create.
+        """
         if self.request.method == "GET":
             return MenuSelectByUserReadSerializer
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
+        """
+        Try to create the menu selected by the user, it will enforce and add the user to the data send in the requests,
+        and also will add the user_timezone_data
+        Returns:
+            object: Response
+        """
         data = request.data
         data["user"] = self.request.user.id
         serializer = self.get_serializer(data=data)

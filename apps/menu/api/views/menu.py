@@ -9,7 +9,7 @@ from apps.menu.models import Menu, MenuItem
 
 class IsAdminUserOrReadOnly(BasePermission):
     """
-    The request is authenticated as a user, or is a read-only request.
+    The request is authenticated as a user and is staff, or is a read-only request.
     """
 
     def has_permission(self, request, view):

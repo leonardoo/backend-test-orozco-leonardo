@@ -13,6 +13,7 @@ from apps.profile_user.models import Profile
 
 @login_required
 def view(request):
+    """dummy view"""
     return render(request, "pages/test_vue.html")
 
 
@@ -24,6 +25,9 @@ class UserListView(StaffOnlyMixin, ListView):
 
 @login_required
 def user_create_view(request):
+    """
+    Create a new user
+    """
     if not request.user.is_staff:
         raise PermissionDenied
     status = 200
@@ -48,6 +52,9 @@ def user_create_view(request):
 
 @login_required
 def user_edit_profile_view(request, pk):
+    """
+    Get the id for a user and update his/her profile
+    """
     if not request.user.is_staff:
         raise PermissionDenied
     user = get_object_or_404(User.objects.prefetch_related("profile"), pk=pk)

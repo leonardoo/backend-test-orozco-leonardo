@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 
 @task
 def send_menu_to_slack(menu_id: str, resend: bool = False):
+    """
+    Get a menu and send it to slack
+    """
     menu = Menu.objects.select_related("location").get(id=menu_id)
     if menu.status == MenuStatus.SEND and not resend:
         return
@@ -43,11 +46,14 @@ def send_menu_to_slack(menu_id: str, resend: bool = False):
             menu.status = MenuStatus.SEND
         menu.save()
     except SlackApiError:
-        logging.exception(f"An Error ocurred in send menu {menu_id}")
+        logging.exception(f"An Error occurred when trying to send menu {menu_id}")
 
 
 @task
 def select_menu_to_send_auto():
+    """
+    Selects the menu to send automatically, using the country's timezone
+    """
     countries = (
         Country.objects.filter(slack_channel_id__isnull=False)
         .exclude(slack_channel_id="")

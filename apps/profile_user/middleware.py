@@ -12,7 +12,8 @@ class AddUserProfileMiddleware(object):
 
     def __call__(self, request):
         """
-        Add user Timezone location to the session
+        Add the user Timezone location to the request, if it exists.
+        with thisdwe can check if the user its in the same timezone of the menu that is being requested.
         :param request:
         :return: (response)
         """
@@ -36,6 +37,4 @@ class AddUserProfileMiddleware(object):
                         None,
                     )
             request.user_timezone_data = timezone_data
-        response = self.get_response(request)
-
-        return response
+        return self.get_response(request)
